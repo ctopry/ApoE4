@@ -1,0 +1,98 @@
+#Clear the workspace
+rm(list = ls())
+
+#Import the data
+data <- read.csv(file.choose(),header=T)
+
+#Define the variables
+#1)Exposure 
+apoe4=data$apoe4 #apo4 contains the 6 APOE ε4 genotypes coded as 1 (ε2/ε2), 2 (ε2/ε3), 3 (ε2/ε4), 4(ε3/ε3),5 (ε3/ε4) and 6 (ε4/ε4). 
+
+#For the APOE ε4 carriers vs non-APOE ε4 carriers, we recode the vector as below. 
+apoe4=data$apoe4 #apo4 contains the 6 APOE ε4 genotypes coded as 1 (ε2/ε2), 2 (ε2/ε3), 3 (ε2/ε4), 4(ε3/ε3),5 (ε3/ε4) and 6 (ε4/ε4). 
+for(i in apoe4){if(i==1 | i==2 | i==4){apoe4[i]=0} else if(i==3 | i==5 | i==6){apoe4[i]=1}}
+
+
+#For the heterozygous-APOE ε4  vs non-APOE ε4 carriers, we recode the vector as below. 
+apoe4=data$apoe4 #apo4 contains the 6 APOE ε4 genotypes coded as 1 (ε2/ε2), 2 (ε2/ε3), 3 (ε2/ε4), 4(ε3/ε3),5 (ε3/ε4) and 6 (ε4/ε4). 
+for(i in apoe4){if(i==1 | i==2 | i==4){apoe4[i]=0} else if(i==3 | i==5){apoe4[i]=1} else if (i==6){apoe4[i]=NA}}
+
+#For the heterozygous-APOE ε4  vs non-APOE ε4 carriers, we recode the vector as below. 
+apoe4=data$apoe4 #apo4 contains the 6 APOE ε4 genotypes coded as 1 (ε2/ε2), 2 (ε2/ε3), 3 (ε2/ε4), 4(ε3/ε3),5 (ε3/ε4) and 6 (ε4/ε4). 
+for(i in apoe4){if(i==1 | i==2 | i==4){apoe4[i]=0} else if(i==3 | i==5){apoe4[i]=NA} else if (i==6){apoe4[i]=1}}
+
+#For the dose-effect analyses. 
+apoe4=data$apoe4 #apo4 contains the 6 APOE ε4 genotypes coded as 1 (ε2/ε2), 2 (ε2/ε3), 3 (ε2/ε4), 4(ε3/ε3),5 (ε3/ε4) and 6 (ε4/ε4). 
+for(i in apoe4){if(i==1 | i==2 | i==4){apoe4[i]=0} else if(i==3 | i==5){apoe4[i]=1} else if (i==6){apoe4[i]=2}}
+apoe4=ordered(apoe4)
+
+#2)Outcome
+ef_echo=data$ef_echo # ejection fraction (%) from Echocardiography (ECHO)
+ef_mri=data$ef_mri # ejection fraction (%) from Cardiac MRI (CMR) 
+
+ee_echo=data$ee_echo #E/e' from ECHO
+lPDSR_mri=data1$lPDSR_mri # longitudinal peak diastolic strain rate from CMR
+rPDSR_mri=data1$rPDSR_mri # radial peak diastolic strain rate from CMR
+
+lvmass_echo=data$lvmass_echo # left ventricular (LV) mass from ECHO
+lvmass_mri=data$lvmass_mri # LV mass from CMR
+
+mcf_echo=data$mcf_echo # myocardial contraction fraction (MCF) from ECHO
+mcf_mri=data$mcf_mri # MCF from CMR
+
+
+ivsS_echo=data$ivsS_echo # Systolic interventricular septum (IVS) thickness from ECHO
+ivsD_echo=data$ivsD_echo #Distolic IVS thickness from ECHO 
+ivs_mri=data$ivs_mri # IVS thickness from CMR
+
+lvpwtS_echo=data$lvpwtS_echo # Systolic LV posterior wall thickness (LVPWT) from ECHO
+lvpwtD_echo=data$lvpwtD_echo # Diastolic LVPWT from ECHO
+lvpwt_mri=data$lvpwt_mri # LVPWT from CMR. 
+
+
+#Covariates
+age=data$age
+sex=data$sex
+sep=data$sep #Socio-Economic Position
+bmi=data$bmi # Body Mass Index 
+cvd=data$cvd # Cardio-vascular Disease (yes/no)
+highcholesterol=data$highcholesterol # High Cholesterol (yes/no)
+diabetes=data$diabetes # Diabetes (yes/no)
+hypertension=data$hypertension # Hypertension (yes/no)
+
+
+#Analysis
+outcome=ef_echo  #The above outcomes are tested sequentially using the temporary variable outcome. ef_echo is used as an example 
+
+#All reported analyses here consisted of generalized linear models with gamma distribution and log link, except for the longitudinal and radial PDSR analyses (see below). 
+
+m1=glm(outcome~apoe4,family=Gamma(link="log")) # Model 1 
+summary(m1)
+exp(cbind(coef(m1),confint(m1)))
+
+m2=glm(outcome~apoe4+sex+sep+age,family=Gamma(link="log")) # Model 2
+summary(m2)
+exp(cbind(coef(m2),confint(m2)))
+
+m3=glm(outcome ~apoe4+bmi,family=Gamma(link="log")) # Model 3  (adjustment for body mass index)
+summary(m3)
+exp(cbind(coef(m3),confint(m3)))
+
+m4=glm(outcome ~apoe4+cvd,family=Gamma(link="log"))# Model 4 (adjustment for cardiovascular disease)
+summary(m4)
+exp(cbind(coef(m4),confint(m4)))
+
+m5=glm(outcome ~apoe4+diabetes,family=Gamma(link="log"))# Model 5 (adjustment for diabetes)
+summary(m5)
+exp(cbind(coef(m5),confint(m5)))
+
+m6=glm(outcome ~apoe4+cholesterol,family=Gamma(link="log")) # Model 6 (adjustment for high cholesterol)
+summary(m6)
+exp(cbind(coef(m6),confint(m6)))
+
+m7=glm(outcome ~apoe4+hypertension,data=data1,family=Gamma(link="log")) # Model 7 (adjustment for hypertension)
+summary(m7)
+exp(cbind(coef(m7),confint(m7)))
+
+#For the longitudinal and radial PDSR analyses generalized linear models with Gaussian distribution and identity link were used 
+m1=glm(outcome~apoe4,data=data1,family=gaussian(link="identity")) #Example for Model 1
